@@ -1,62 +1,62 @@
 <?php
-// اتصال به دیتابیس
+// تنظیمات اتصال به پایگاه داده
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "your_database";
 
-// ایجاد اتصال به دیتابیس
+// برقراری ارتباط با پایگاه داده
 $connection = mysqli_connect($servername, $username, $password, $dbname);
 
-// بررسی اتصال
+// بررسی وضعیت اتصال به پایگاه داده
 if (!$connection) {
-    die("خطا در اتصال به دیتابیس: " . mysqli_connect_error());
+    die("خطا در اتصال به پایگاه داده: " . mysqli_connect_error());
 }
 
-// وقتی فرم ارسال میشه
+// بررسی ارسال فرم
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // دریافت اطلاعات از فرم
+    // دریافت اطلاعات ارسال شده از فرم
     $first_name = $_POST['first_name'];
     $last_name = $_POST['last_name'];
     $username = $_POST['username'];
     $img = '';
 
-    // بررسی آپلود تصویر
+    // بررسی وضعیت آپلود تصویر
     if (isset($_FILES['img']) && $_FILES['img']['error'] == 0) {
-        // مسیر ذخیره تصاویر
+        // تنظیم مسیر ذخیره سازی تصاویر
         $upload_folder = 'uploads/';
 
-        // ساخت پوشه اگر وجود نداره
+        // ایجاد پوشه آپلود در صورت عدم وجود
         if (!is_dir($upload_folder)) {
             mkdir($upload_folder);
         }
 
-        // ساخت نام فایل جدید
+        // ایجاد نام یکتا برای فایل
         $file_name = time() . '_' . $_FILES['img']['name'];
         $target_path = $upload_folder . $file_name;
 
-        // آپلود تصویر
+        // انتقال فایل آپلود شده به پوشه مورد نظر
         if (move_uploaded_file($_FILES['img']['tmp_name'], $target_path)) {
             $img = $target_path;
         }
     }
 
-    // ذخیره اطلاعات در دیتابیس
+    // درج اطلاعات در پایگاه داده
     $query = "INSERT INTO users (first_name, last_name, username, img) 
               VALUES ('$first_name', '$last_name', '$username', '$img')";
     
     mysqli_query($connection, $query);
 
-    // بستن اتصال
+    // پایان ارتباط با پایگاه داده
     mysqli_close($connection);
 
-    // برگشت به صفحه اصلی
+    // انتقال به صفحه اصلی
     header('Location: index.php');
     die();
 }
 ?>
 
-<!-- قسمت HTML فرم -->
+<!-- بخش HTML -->
 <!DOCTYPE html>
 <html>
 <head>

@@ -1,21 +1,21 @@
 <?php
-// اتصال به دیتابیس
+// تنظیمات اتصال به پایگاه داده
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "your_database";
 
-// ایجاد اتصال به دیتابیس
+// برقراری ارتباط با پایگاه داده
 $connection = mysqli_connect($servername, $username, $password, $dbname);
 
-// بررسی اتصال
+// بررسی وضعیت اتصال
 if (!$connection) {
-    die("خطا در اتصال به دیتابیس: " . mysqli_connect_error());
+    die("خطا در اتصال به پایگاه داده: " . mysqli_connect_error());
 }
 
-// بررسی وجود شناسه کاربر
+// بررسی وجود شناسه کاربر در پارامترهای URL
 if (!isset($_GET['id'])) {
-    // اگر شناسه وجود نداشت، برگرد به صفحه اصلی
+    // انتقال به صفحه اصلی در صورت عدم وجود شناسه
     header('Location: index.php');
     die();
 }
@@ -23,27 +23,27 @@ if (!isset($_GET['id'])) {
 // دریافت شناسه کاربر
 $id = $_GET['id'];
 
-// پیدا کردن تصویر کاربر
+// دریافت اطلاعات تصویر کاربر قبل از حذف
 $query = "SELECT img FROM users WHERE id = '$id'";
 $result = mysqli_query($connection, $query);
 $user = mysqli_fetch_assoc($result);
 
-// حذف تصویر از پوشه
+// حذف فایل تصویر از سرور
 if ($user && $user['img'] != '') {
-    // اگر تصویر وجود داشت، از پوشه حذف کن
+    // بررسی وجود فایل و حذف آن
     if (file_exists($user['img'])) {
         unlink($user['img']);
     }
 }
 
-// حذف کاربر از دیتابیس
+// حذف اطلاعات کاربر از پایگاه داده
 $query = "DELETE FROM users WHERE id = '$id'";
 mysqli_query($connection, $query);
 
-// بستن اتصال دیتابیس
+// پایان ارتباط با پایگاه داده
 mysqli_close($connection);
 
-// برگشت به صفحه اصلی
+// بازگشت به صفحه اصلی
 header('Location: index.php');
 die();
 ?> 

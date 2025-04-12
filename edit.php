@@ -1,19 +1,19 @@
 <?php
-// اتصال به دیتابیس
+// تنظیمات اتصال به پایگاه داده
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "your_database";
 
-// ایجاد اتصال به دیتابیس
+// برقراری ارتباط با پایگاه داده
 $connection = mysqli_connect($servername, $username, $password, $dbname);
 
-// بررسی اتصال
+// بررسی وضعیت اتصال
 if (!$connection) {
-    die("خطا در اتصال به دیتابیس: " . mysqli_connect_error());
+    die("خطا در اتصال به پایگاه داده: " . mysqli_connect_error());
 }
 
-// بررسی وجود شناسه کاربر
+// بررسی وجود شناسه کاربر در پارامترهای URL
 if (!isset($_GET['id'])) {
     header('Location: index.php');
     die();
@@ -21,38 +21,42 @@ if (!isset($_GET['id'])) {
 
 $id = $_GET['id'];
 
-// دریافت اطلاعات کاربر
+// دریافت اطلاعات کاربر از پایگاه داده
 $query = "SELECT * FROM users WHERE id = '$id'";
 $result = mysqli_query($connection, $query);
 $user = mysqli_fetch_assoc($result);
 
-// اگر کاربر پیدا نشد
+// بررسی وجود کاربر
 if (!$user) {
     header('Location: index.php');
     die();
 }
 
-// وقتی فرم ویرایش ارسال میشه
+// پردازش فرم ویرایش
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // دریافت اطلاعات جدید از فرم
     $first_name = $_POST['first_name'];
     $last_name = $_POST['last_name'];
     $username = $_POST['username'];
-    $img = $user['img']; // حفظ تصویر قبلی
+    $img = $user['img']; // حفظ تصویر فعلی
 
     // بررسی آپلود تصویر جدید
     if (isset($_FILES['img']) && $_FILES['img']['error'] == 0) {
+        // تنظیم مسیر ذخیره سازی
         $upload_folder = 'uploads/';
         
+        // ایجاد پوشه در صورت نیاز
         if (!is_dir($upload_folder)) {
             mkdir($upload_folder);
         }
 
+        // ایجاد نام یکتا برای فایل جدید
         $file_name = time() . '_' . $_FILES['img']['name'];
         $target_path = $upload_folder . $file_name;
 
         // آپلود تصویر جدید
         if (move_uploaded_file($_FILES['img']['tmp_name'], $target_path)) {
-            // حذف تصویر قدیمی
+            // حذف تصویر قبلی از سرور
             if ($user['img'] && file_exists($user['img'])) {
                 unlink($user['img']);
             }
@@ -60,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // بروزرسانی اطلاعات
+    // بروزرسانی اطلاعات در پایگاه داده
     $query = "UPDATE users SET 
               first_name = '$first_name',
               last_name = '$last_name',
@@ -70,9 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     mysqli_query($connection, $query);
     
-    // بستن اتصال
+    // پایان ارتباط با پایگاه داده
     mysqli_close($connection);
     
+    // انتقال به صفحه اصلی
     header('Location: index.php');
     die();
 }

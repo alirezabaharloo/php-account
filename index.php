@@ -1,55 +1,117 @@
 <?php
-require_once 'config.php';
+// تنظیمات اتصال به پایگاه داده
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "your_database";
 
-$stmt = $pdo->query("SELECT * FROM users ORDER BY id DESC");
-$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// برقراری ارتباط با پایگاه داده
+$connection = mysqli_connect($servername, $username, $password, $dbname);
+
+// بررسی وضعیت اتصال
+if (!$connection) {
+    die("خطا در اتصال به پایگاه داده: " . mysqli_connect_error());
+}
+
+// دریافت لیست تمام کاربران به ترتیب نزولی
+$query = "SELECT * FROM users ORDER BY id DESC";
+$result = mysqli_query($connection, $query);
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>سیستم مدیریت کاربران</title>
+    <meta charset="utf-8">
+    <style>
+        /* استایل‌های ظاهری صفحه */
+        body {
+            font-family: Tahoma;
+            direction: rtl;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            padding: 5px 10px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2px;
+        }
+        .btn-new {
+            background: #4CAF50;
+        }
+        .btn-edit {
+            background: #ff9800;
+        }
+        .btn-delete {
+            background: #f44336;
+        }
+        .user-image {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="mb-4">User List</h1>
-        <a href="new.php" class="btn btn-primary mb-3">Add New User</a>
-        
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
-                    <th>Image</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($users as $user): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($user['id']); ?></td>
-                    <td><?php echo htmlspecialchars($user['first_name']); ?></td>
-                    <td><?php echo htmlspecialchars($user['last_name']); ?></td>
-                    <td><?php echo htmlspecialchars($user['username']); ?></td>
-                    <td>
-                        <?php if (!empty($user['img'])): ?>
-                            <img src="<?php echo htmlspecialchars($user['img']); ?>" alt="User Image" style="width: 50px; height: 50px;">
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <a href="edit.php?id=<?php echo $user['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                        <a href="delete.php?id=<?php echo $user['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <h2>مدیریت کاربران</h2>
+    
+    <!-- دکمه افزودن کاربر جدید -->
+    <a href="new.php" class="btn btn-new">افزودن کاربر جدید</a>
+    
+    <!-- جدول نمایش کاربران -->
+    <table>
+        <tr>
+            <th>شناسه</th>
+            <th>نام</th>
+            <th>نام خانوادگی</th>
+            <th>نام کاربری</th>
+            <th>تصویر پروفایل</th>
+            <th>عملیات</th>
+        </tr>
+        <?php while ($user = mysqli_fetch_assoc($result)): ?>
+        <!-- نمایش اطلاعات هر کاربر -->
+        <tr>
+            <td><?php echo htmlspecialchars($user['id']); ?></td>
+            <td><?php echo htmlspecialchars($user['first_name']); ?></td>
+            <td><?php echo htmlspecialchars($user['last_name']); ?></td>
+            <td><?php echo htmlspecialchars($user['username']); ?></td>
+            <td>
+                <?php if (!empty($user['img'])): ?>
+                    <img src="<?php echo htmlspecialchars($user['img']); ?>" class="user-image" alt="تصویر پروفایل کاربر">
+                <?php endif; ?>
+            </td>
+            <td>
+                <!-- دکمه‌های عملیات -->
+                <a href="edit.php?id=<?php echo $user['id']; ?>" class="btn btn-edit">ویرایش</a>
+                <a href="delete.php?id=<?php echo $user['id']; ?>" class="btn btn-delete" 
+                   onclick="return confirm('آیا از حذف این کاربر اطمینان دارید؟')">حذف</a>
+            </td>
+        </tr>
+        <?php endwhile; ?>
+    </table>
+
+    <?php
+    // پایان ارتباط با پایگاه داده
+    mysqli_close($connection);
+    ?>
 </body>
 </html> 
